@@ -6,3 +6,48 @@ datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
 }
+
+enum Role {
+  ADMIN
+  USER
+}
+
+model User {
+  id    String @id @default(uuid())
+  email String @unique
+  name  String
+  role  Role   @default(USER)
+
+  profile Profile?
+  post    Post[]
+
+  @@index([id, email])
+}
+
+model Profile {
+  id  String @id @default(uuid())
+  bio String
+
+  user   User   @relation(fields: [userId], references: [id])
+  userId String @unique
+}
+
+model Post {
+  id        Int      @id @default(autoincrement())
+  title     String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  published Boolean  @default(false)
+
+  category Category[]
+
+  User   User?   @relation(fields: [userId], references: [id])
+  userId String?
+}
+
+model Category {
+  id   Int    @id @default(autoincrement())
+  name String
+
+  post Post[]
+}
